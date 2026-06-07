@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<title>ساج | پلتفرم ساختمان</title>
+
+<style>
+
+body{
+background:#f5f6fa;
+font-family:tahoma,sans-serif;
+padding:40px;
+max-width:900px;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+input{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:8px;
+background:#111;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+background:#f9f9f9;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>ساج</h1>
+<p>اتصال نیرو، پیمانکار و کارفرما</p>
+
+<div class="card">
+<h2>آمار ساج</h2>
+
+<p>تعداد نیروها: <span id="workersCount">0</span></p>
+<p>تعداد پیمانکارها: <span id="contractorsCount">0</span></p>
+<p>تعداد پروژه‌ها: <span id="projectsCount">0</span></p>
+
+</div>
+
+<div class="card">
+
+<h2>ثبت نیرو</h2>
+
+<input id="name" placeholder="نام">
+<input id="skill" placeholder="تخصص (آرماتوربند، کاشی کار، برقکار و...)">
+<input id="city" placeholder="شهر">
+<input id="phone" placeholder="شماره تماس">
+
+<button onclick="addWorker()">ثبت نیرو</button>
+
+</div>
+
+<div class="card">
+
+<h2>ثبت پیمانکار</h2>
+
+<input id="cname" placeholder="نام پیمانکار">
+<input id="ccity" placeholder="شهر">
+<input id="cphone" placeholder="شماره تماس">
+
+<button onclick="addContractor()">ثبت پیمانکار</button>
+
+</div>
+
+<div class="card">
+
+<h2>ثبت پروژه</h2>
+
+<input id="ptitle" placeholder="نوع پروژه">
+<input id="pcount" placeholder="تعداد نیرو">
+<input id="pcity" placeholder="شهر">
+<input id="pphone" placeholder="شماره تماس">
+
+<button onclick="addProject()">ثبت پروژه</button>
+
+</div>
+
+<div class="card">
+
+<h2>لیست نیروها</h2>
+
+<input id="search" placeholder="جستجو بر اساس تخصص یا شهر..." onkeyup="renderWorkers()">
+
+<ul id="list"></ul>
+
+</div>
+
+<div class="card">
+
+<h2>لیست پیمانکارها</h2>
+<ul id="clist"></ul>
+
+</div>
+
+<div class="card">
+
+<h2>لیست پروژه‌ها</h2>
+<ul id="plist"></ul>
+
+</div>
+
+<script>
+
+let workers = JSON.parse(localStorage.getItem("workers")) || []
+let contractors = JSON.parse(localStorage.getItem("contractors")) || []
+let projects = JSON.parse(localStorage.getItem("projects")) || []
+
+function updateStats(){
+
+document.getElementById("workersCount").innerText = workers.length
+document.getElementById("contractorsCount").innerText = contractors.length
+document.getElementById("projectsCount").innerText = projects.length
+
+}
+
+function addWorker(){
+
+const name=document.getElementById("name").value
+const skill=document.getElementById("skill").value
+const city=document.getElementById("city").value
+const phone=document.getElementById("phone").value
+
+workers.push({name,skill,city,phone})
+
+localStorage.setItem("workers",JSON.stringify(workers))
+
+renderWorkers()
+
+}
+
+function renderWorkers(){
+
+
+
+const list=document.getElementById("list")
+const search=document.getElementById("search").value.toLowerCase()
+
+list.innerHTML=""
+
+workers
+.filter(w =>
+w.skill.toLowerCase().includes(search) ||
+w.city.toLowerCase().includes(search)
+)
+.forEach((w , index)=>{
+
+const li=document.createElement("li")
+
+li.innerHTML=
+"<b>"+w.name+"</b><br>"+
+w.skill+"<br>"+
+w.city+"<br>"+
+w.phone+
+"<br><br><button onclick='deleteWorker("+index+")'>حذف</button>"
+
+list.appendChild(li)
+
+})
+
+updateStats()
+
+}
+
+
+function deleteWorker(index){
+
+workers.splice(index,1)
+
+localStorage.setItem(
+"workers",
+JSON.stringify(workers)
+)
+
+renderWorkers()
+
+}
+
+function addContractor(){
+
+const name=document.getElementById("cname").value
+const city=document.getElementById("ccity").value
+const phone=document.getElementById("cphone").value
+
+contractors.push({name,city,phone})
+
+localStorage.setItem("contractors",JSON.stringify(contractors))
+
+renderContractors()
+
+}
+
+function renderContractors(){
+
+const list=document.getElementById("clist")
+list.innerHTML=""
+
+contractors.forEach((c,index)=>{
+
+const li=document.createElement("li")
+
+li.innerHTML=
+"<b>"+c.name+"</b><br>"+
+c.city+"<br>"+
+c.phone+
+"<br><br><button onclick='deleteContractor("+index+")'>حذف</button>"
+
+list.appendChild(li)
+
+})
+
+updateStats()
+
+}
+
+
+function deleteContractor(index){
+
+contractors.splice(index,1)
+
+localStorage.setItem(
+"contractors",
+JSON.stringify(contractors)
+)
+
+renderContractors()
+
+}
+
+
+function addProject(){
+
+const title=document.getElementById("ptitle").value
+const count=document.getElementById("pcount").value
+const city=document.getElementById("pcity").value
+const phone=document.getElementById("pphone").value
+
+projects.push({title,count,city,phone})
+
+localStorage.setItem("projects",JSON.stringify(projects))
+
+renderProjects()
+
+}
+
+function renderProjects(){const list=document.getElementById("plist")
+list.innerHTML=""
+
+projects.forEach((p,index)=>{
+
+const li=document.createElement("li")
+
+li.innerHTML=
+"<b>"+p.title+"</b><br>"+
+"نیرو: "+p.count+" نفر<br>"+
+p.city+"<br>"+
+p.phone+
+"<br><br><button onclick='deleteProject("+index+")'>حذف</button>"
+
+list.appendChild(li)
+
+})
+
+updateStats()
+
+}
+
+function deleteProject(index){
+
+projects.splice(index,1)
+
+localStorage.setItem(
+"projects",
+JSON.stringify(projects)
+)
+
+renderProjects()
+
+}
+
+renderWorkers()
+renderContractors()
+renderProjects()
+
+</script>
+
+</body>
+</html>
